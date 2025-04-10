@@ -2,6 +2,7 @@
 
 use axum::{Router, extract::State, http::StatusCode, routing::get, serve};
 use std::{
+    env, // Add this to import the env module
     net::SocketAddr,
     path::PathBuf,
     sync::{
@@ -103,8 +104,13 @@ async fn main() {
         .route("/stop", get(handle_stop_recording))
         .with_state(shared_state);
 
-    const PORT: u16 = 8000;
-    let addr = SocketAddr::from(([127, 0, 0, 1], PORT));
+    // Read the port from the environment variable or default to 8000
+    let port: u16 = env::var("PORT")
+        .unwrap_or_else(|_| "8000".to_string())
+        .parse()
+        .expect("PORT must be a valid u16");
+
+    let addr = SocketAddr::from(([127, 0, 0, 1], port));
     println!("Listening on {}", addr);
 
     let listener = TcpListener::bind(addr)
